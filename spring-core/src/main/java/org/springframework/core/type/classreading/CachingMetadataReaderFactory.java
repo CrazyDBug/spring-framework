@@ -113,6 +113,7 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 	}
 
 
+	// 利用了ASM技术，并没有加载类到JVM中
 	@Override
 	public MetadataReader getMetadataReader(Resource resource) throws IOException {
 		if (this.metadataReaderCache instanceof ConcurrentMap) {
