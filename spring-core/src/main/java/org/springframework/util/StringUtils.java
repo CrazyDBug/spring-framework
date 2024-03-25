@@ -574,10 +574,12 @@ public abstract class StringUtils {
 	 * @see java.beans.Introspector#decapitalize(String)
 	 */
 	public static String uncapitalizeAsProperty(String str) {
+		// 前两个字母大写，直接返回类名
 		if (!hasLength(str) || (str.length() > 1 && Character.isUpperCase(str.charAt(0)) &&
 				Character.isUpperCase(str.charAt(1)))) {
 			return str;
 		}
+		// 类名第一个字母小写
 		return changeFirstCharacterCase(str, false);
 	}
 

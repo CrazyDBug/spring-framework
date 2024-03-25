@@ -135,7 +135,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @since 3.1
 	 * @see #setResourceLoader
 	 */
-	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean useDefaultFilters,
+	public  ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean useDefaultFilters,
 			Environment environment) {
 
 		this(registry, useDefaultFilters, environment,
@@ -163,6 +163,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		this.registry = registry;
 
+		// 注册默认过滤器
 		if (useDefaultFilters) {
 			registerDefaultFilters();
 		}
@@ -274,20 +275,30 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
 		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
 		for (String basePackage : basePackages) {
+
 			Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
+
 			for (BeanDefinition candidate : candidates) {
+				// 解析@Scope注解 数据
 				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 				candidate.setScope(scopeMetadata.getScopeName());
+
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
+
 				if (candidate instanceof AbstractBeanDefinition abstractBeanDefinition) {
+					// 设置默认值
 					postProcessBeanDefinition(abstractBeanDefinition, beanName);
 				}
+
 				if (candidate instanceof AnnotatedBeanDefinition annotatedBeanDefinition) {
 					// 解析@Lazy、@Primary、@DependsOn、@Role、@Description
 					AnnotationConfigUtils.processCommonDefinitionAnnotations(annotatedBeanDefinition);
 				}
+
 				// 检查Spring容器中是否已经存在该beanName
 				if (checkCandidate(beanName, candidate)) {
+
+					// 容器中不存在该beanName，则注册
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
 					definitionHolder =
 							AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
@@ -343,6 +354,8 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 			return true;
 		}
 
+		// 存在相同名称的BeanDefinition，判断是否兼容
+
 		BeanDefinition existingDef = this.registry.getBeanDefinition(beanName);
 		BeanDefinition originatingDef = existingDef.getOriginatingBeanDefinition();
 		if (originatingDef != null) {
@@ -357,11 +370,13 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		}
 
 		// Scanned same file or equivalent class twice?
-		// 是否兼容，如果兼容返回false表示不会重新注册到Spring容器中，如果不冲突则会抛异常。
+		// 是否兼容，如果兼容返回false——不会重新注册到Spring容器中，如果不兼容则会抛异常。
+		// 场景：同一个类扫描两次
 		if (isCompatible(beanDefinition, existingDef)) {
 			return false;
 		}
 
+		// bean命名重复
 		throw new ConflictingBeanDefinitionException("Annotation-specified bean name '" + beanName +
 				"' for bean class [" + beanDefinition.getBeanClassName() + "] conflicts with existing, " +
 				"non-compatible bean definition of same name and class [" + existingDef.getBeanClassName() + "]");
@@ -379,6 +394,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * new definition to be skipped in favor of the existing definition
 	 */
 	protected boolean isCompatible(BeanDefinition newDef, BeanDefinition existingDef) {
+		// 根据source是否相同判断是否是同一个类
 		return ((newDef.getSource() != null && newDef.getSource().equals(existingDef.getSource())) ||
 				newDef.equals(existingDef));
 	}

@@ -107,13 +107,16 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	@Override
 	public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
 		if (definition instanceof AnnotatedBeanDefinition annotatedBeanDefinition) {
+			// 获取注解所指定的名称——查看@Component注解的value属性
 			String beanName = determineBeanNameFromAnnotation(annotatedBeanDefinition);
+
 			if (StringUtils.hasText(beanName)) {
 				// Explicit bean name found.
 				return beanName;
 			}
 		}
 		// Fallback: generate a unique default bean name.
+		// @Component未指定注解的值，则使用默认的规则生成beanName
 		return buildDefaultBeanName(definition, registry);
 	}
 
@@ -147,7 +150,10 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 				Set<String> metaAnnotationTypes = this.metaAnnotationTypesCache.computeIfAbsent(annotationType,
 						key -> getMetaAnnotationTypes(mergedAnnotation));
 				if (isStereotypeWithNameValue(annotationType, metaAnnotationTypes, attributes)) {
+
+					// 取@Component注解的value属性值
 					Object value = attributes.get("value");
+
 					if (value instanceof String currentName && !currentName.isBlank()) {
 						if (conventionBasedStereotypeCheckCache.add(annotationType) &&
 								metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME) && logger.isWarnEnabled()) {
@@ -218,6 +224,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	protected boolean isStereotypeWithNameValue(String annotationType,
 			Set<String> metaAnnotationTypes, Map<String, Object> attributes) {
 
+		// 是否包含@Component注解
 		boolean isStereotype = metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME) ||
 				annotationType.equals("jakarta.annotation.ManagedBean") ||
 				annotationType.equals("javax.annotation.ManagedBean") ||
