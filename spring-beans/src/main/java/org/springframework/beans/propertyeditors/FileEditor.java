@@ -75,6 +75,9 @@ public class FileEditor extends PropertyEditorSupport {
 	}
 
 
+	/**
+	 * 类型转换器——将字符串转换为File对象
+	 */
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (!StringUtils.hasText(text)) {

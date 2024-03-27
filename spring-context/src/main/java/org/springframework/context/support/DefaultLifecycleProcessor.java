@@ -244,9 +244,11 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	}
 
 	private void startBeans(boolean autoStartupOnly) {
+		// 拿出所有lifecycle的bean
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
 		Map<Integer, LifecycleGroup> phases = new TreeMap<>();
 
+		// 按每个bean的phase分组，然后按phase排序
 		lifecycleBeans.forEach((beanName, bean) -> {
 			if (!autoStartupOnly || isAutoStartupCandidate(beanName, bean)) {
 				int phase = getPhase(bean);
@@ -256,6 +258,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 				).add(beanName, bean);
 			}
 		});
+
+		// 按每组执行start操作
 		if (!phases.isEmpty()) {
 			phases.values().forEach(LifecycleGroup::start);
 		}
@@ -393,6 +397,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			String beanNameToRegister = BeanFactoryUtils.transformedBeanName(beanName);
 			boolean isFactoryBean = beanFactory.isFactoryBean(beanNameToRegister);
 			String beanNameToCheck = (isFactoryBean ? BeanFactory.FACTORY_BEAN_PREFIX + beanName : beanName);
+
+			// 如果所定义的Lifecycle bean是单例模式，或是SmartLifecycle bean
 			if ((beanFactory.containsSingleton(beanNameToRegister) &&
 					(!isFactoryBean || matchesBeanType(Lifecycle.class, beanNameToCheck, beanFactory))) ||
 					matchesBeanType(SmartLifecycle.class, beanNameToCheck, beanFactory)) {
