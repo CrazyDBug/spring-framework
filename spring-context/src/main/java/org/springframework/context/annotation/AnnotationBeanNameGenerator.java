@@ -70,19 +70,20 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @author Sam Brannen
- * @since 2.5
  * @see org.springframework.stereotype.Component#value()
  * @see org.springframework.stereotype.Repository#value()
  * @see org.springframework.stereotype.Service#value()
  * @see org.springframework.stereotype.Controller#value()
  * @see jakarta.inject.Named#value()
  * @see FullyQualifiedAnnotationBeanNameGenerator
+ * @since 2.5
  */
 public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 
 	/**
 	 * A convenient constant for a default {@code AnnotationBeanNameGenerator} instance,
 	 * as used for component scanning purposes.
+	 *
 	 * @since 5.2
 	 */
 	public static final AnnotationBeanNameGenerator INSTANCE = new AnnotationBeanNameGenerator();
@@ -98,18 +99,19 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	 * Set used to track which stereotype annotations have already been checked
 	 * to see if they use a convention-based override for the {@code value}
 	 * attribute in {@code @Component}.
-	 * @since 6.1
+	 *
 	 * @see #determineBeanNameFromAnnotation(AnnotatedBeanDefinition)
+	 * @since 6.1
 	 */
 	private static final Set<String> conventionBasedStereotypeCheckCache = ConcurrentHashMap.newKeySet();
 
 	private final Map<String, Set<String>> metaAnnotationTypesCache = new ConcurrentHashMap<>();
 
 
-
 	@Override
 	public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
 		if (definition instanceof AnnotatedBeanDefinition annotatedBeanDefinition) {
+			// 获取注解指定的名字
 			String beanName = determineBeanNameFromAnnotation(annotatedBeanDefinition);
 			if (StringUtils.hasText(beanName)) {
 				// Explicit bean name found.
@@ -122,6 +124,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 
 	/**
 	 * Derive a bean name from one of the annotations on the class.
+	 *
 	 * @param annotatedDef the annotation-aware bean definition
 	 * @return the bean name, or {@code null} if none is found
 	 */
@@ -149,6 +152,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 				String annotationType = mergedAnnotation.getType().getName();
 				Set<String> metaAnnotationTypes = this.metaAnnotationTypesCache.computeIfAbsent(annotationType,
 						key -> getMetaAnnotationTypes(mergedAnnotation));
+				// 存在@Component等注解
 				if (isStereotypeWithNameValue(annotationType, metaAnnotationTypes, attributes)) {
 					Object value = attributes.get(MergedAnnotation.VALUE);
 					if (value instanceof String currentName && !currentName.isBlank()) {
@@ -160,15 +164,14 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 										other than @Component's 'value' attribute, the value is still used as the \
 										@Component name based on convention. As of Spring Framework 7.0, such a \
 										'value' attribute will no longer be used as the @Component name."""
-											.formatted(annotationType));
-							}
-							else {
+										.formatted(annotationType));
+							} else {
 								logger.warn("""
 										Support for convention-based @Component names is deprecated and will \
 										be removed in a future version of the framework. Please annotate the \
 										'value' attribute in @%s with @AliasFor(annotation=Component.class) \
 										to declare an explicit alias for @Component's 'value' attribute."""
-											.formatted(annotationType));
+										.formatted(annotationType));
 							}
 						}
 						if (beanName != null && !currentName.equals(beanName)) {
@@ -196,10 +199,11 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	 * account {@link org.springframework.core.annotation.AliasFor @AliasFor}
 	 * semantics for annotation attribute overrides for {@code @Component}'s
 	 * {@code value} attribute.
+	 *
 	 * @param metadata the {@link AnnotationMetadata} for the underlying class
 	 * @return the explicit bean name, or {@code null} if not found
-	 * @since 6.1
 	 * @see org.springframework.stereotype.Component#value()
+	 * @since 6.1
 	 */
 	@Nullable
 	private String getExplicitBeanName(AnnotationMetadata metadata) {
@@ -223,13 +227,14 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	/**
 	 * Check whether the given annotation is a stereotype that is allowed
 	 * to suggest a component name through its {@code value()} attribute.
-	 * @param annotationType the name of the annotation class to check
+	 *
+	 * @param annotationType      the name of the annotation class to check
 	 * @param metaAnnotationTypes the names of meta-annotations on the given annotation
-	 * @param attributes the map of attributes for the given annotation
+	 * @param attributes          the map of attributes for the given annotation
 	 * @return whether the annotation qualifies as a stereotype with component name
 	 */
 	protected boolean isStereotypeWithNameValue(String annotationType,
-			Set<String> metaAnnotationTypes, Map<String, Object> attributes) {
+												Set<String> metaAnnotationTypes, Map<String, Object> attributes) {
 
 		boolean isStereotype = metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME) ||
 				annotationType.equals("jakarta.annotation.ManagedBean") ||
@@ -243,8 +248,9 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	/**
 	 * Derive a default bean name from the given bean definition.
 	 * <p>The default implementation delegates to {@link #buildDefaultBeanName(BeanDefinition)}.
+	 *
 	 * @param definition the bean definition to build a bean name for
-	 * @param registry the registry that the given bean definition is being registered with
+	 * @param registry   the registry that the given bean definition is being registered with
 	 * @return the default bean name (never {@code null})
 	 */
 	protected String buildDefaultBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
@@ -258,6 +264,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	 * <p>Note that inner classes will thus have names of the form
 	 * "outerClassName.InnerClassName", which because of the period in the
 	 * name may be an issue if you are autowiring by name.
+	 *
 	 * @param definition the bean definition to build a bean name for
 	 * @return the default bean name (never {@code null})
 	 */
@@ -271,6 +278,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	/**
 	 * Determine if the supplied annotation type declares a {@code value()} attribute
 	 * with an explicit alias configured via {@link AliasFor @AliasFor}.
+	 *
 	 * @since 6.2.3
 	 */
 	private static boolean hasExplicitlyAliasedValueAttribute(Class<? extends Annotation> annotationType) {

@@ -80,10 +80,11 @@ public class CandidateComponentsIndex {
 	 * @return the candidate types associated with the specified {@code stereotype}
 	 * or an empty set if none has been found for the specified {@code basePackage}
 	 */
-	public Set<String> getCandidateTypes(String basePackage, String stereotype) {
+	public Set<String>  getCandidateTypes(String basePackage, String stereotype) {
 		List<Entry> candidates = this.index.get(stereotype);
 		if (candidates != null) {
 			return candidates.parallelStream()
+					// 包路径和扫描路径匹配
 					.filter(t -> t.match(basePackage))
 					.map(t -> t.type)
 					.collect(Collectors.toSet());
