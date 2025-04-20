@@ -42,6 +42,7 @@ public abstract class AbstractRequestAttributesScope implements Scope {
 		RequestAttributes attributes = RequestContextHolder.currentRequestAttributes();
 		Object scopedObject = attributes.getAttribute(name, getScope());
 		if (scopedObject == null) {
+			// 执行lambda表达式 创建Bean对象
 			scopedObject = objectFactory.getObject();
 			attributes.setAttribute(name, scopedObject, getScope());
 			// Retrieve object again, registering it for implicit session attribute updates.
@@ -64,8 +65,7 @@ public abstract class AbstractRequestAttributesScope implements Scope {
 		if (scopedObject != null) {
 			attributes.removeAttribute(name, getScope());
 			return scopedObject;
-		}
-		else {
+		} else {
 			return null;
 		}
 	}
@@ -86,6 +86,7 @@ public abstract class AbstractRequestAttributesScope implements Scope {
 
 	/**
 	 * Template method that determines the actual target scope.
+	 *
 	 * @return the target scope, in the form of an appropriate
 	 * {@link RequestAttributes} constant
 	 * @see RequestAttributes#SCOPE_REQUEST

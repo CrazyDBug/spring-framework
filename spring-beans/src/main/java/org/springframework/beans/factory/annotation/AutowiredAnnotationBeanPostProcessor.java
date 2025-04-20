@@ -152,10 +152,10 @@ import org.springframework.util.StringUtils;
  * @author Sebastien Deleuze
  * @author Sam Brannen
  * @author Phillip Webb
- * @since 2.5
  * @see #setAutowiredAnnotationType
  * @see Autowired
  * @see Value
+ * @since 2.5
  */
 public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationAwareBeanPostProcessor,
 		MergedBeanDefinitionPostProcessor, BeanRegistrationAotProcessor, PriorityOrdered, BeanFactoryAware {
@@ -202,8 +202,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			this.autowiredAnnotationTypes.add((Class<? extends Annotation>)
 					ClassUtils.forName("jakarta.inject.Inject", classLoader));
 			logger.trace("'jakarta.inject.Inject' annotation found and supported for autowiring");
-		}
-		catch (ClassNotFoundException ex) {
+		} catch (ClassNotFoundException ex) {
 			// jakarta.inject API not available - simply skip.
 		}
 
@@ -211,8 +210,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			this.autowiredAnnotationTypes.add((Class<? extends Annotation>)
 					ClassUtils.forName("javax.inject.Inject", classLoader));
 			logger.trace("'javax.inject.Inject' annotation found and supported for autowiring");
-		}
-		catch (ClassNotFoundException ex) {
+		} catch (ClassNotFoundException ex) {
 			// javax.inject API not available - simply skip.
 		}
 	}
@@ -252,6 +250,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 	/**
 	 * Set the name of an attribute of the annotation that specifies whether it is required.
+	 *
 	 * @see #setRequiredParameterValue(boolean)
 	 */
 	public void setRequiredParameterName(String requiredParameterName) {
@@ -262,6 +261,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	 * Set the boolean value that marks a dependency as required.
 	 * <p>For example if using 'required=true' (the default), this value should be
 	 * {@code true}; but if using 'optional=false', this value should be {@code false}.
+	 *
 	 * @see #setRequiredParameterName(String)
 	 */
 	public void setRequiredParameterValue(boolean requiredParameterValue) {
@@ -327,7 +327,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	}
 
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private Collection<AutowiredElement> getAutowiredElements(InjectionMetadata metadata, PropertyValues propertyValues) {
 		return (Collection) metadata.getInjectedElements(propertyValues);
 	}
@@ -377,11 +377,10 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 					Constructor<?>[] rawCandidates;
 					try {
 						rawCandidates = beanClass.getDeclaredConstructors();
-					}
-					catch (Throwable ex) {
+					} catch (Throwable ex) {
 						throw new BeanCreationException(beanName,
 								"Resolution of declared constructors on bean Class [" + beanClass.getName() +
-								"] from ClassLoader [" + beanClass.getClassLoader() + "] failed", ex);
+										"] from ClassLoader [" + beanClass.getClassLoader() + "] failed", ex);
 					}
 					List<Constructor<?>> candidates = new ArrayList<>(rawCandidates.length);
 					Constructor<?> requiredConstructor = null;
@@ -391,8 +390,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 					for (Constructor<?> candidate : rawCandidates) {
 						if (!candidate.isSynthetic()) {
 							nonSyntheticConstructors++;
-						}
-						else if (primaryConstructor != null) {
+						} else if (primaryConstructor != null) {
 							continue;
 						}
 						MergedAnnotation<?> ann = findAutowiredAnnotation(candidate);
@@ -403,8 +401,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 									Constructor<?> superCtor =
 											userClass.getDeclaredConstructor(candidate.getParameterTypes());
 									ann = findAutowiredAnnotation(superCtor);
-								}
-								catch (NoSuchMethodException ex) {
+								} catch (NoSuchMethodException ex) {
 									// Simply proceed, no equivalent superclass constructor found...
 								}
 							}
@@ -413,22 +410,21 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 							if (requiredConstructor != null) {
 								throw new BeanCreationException(beanName,
 										"Invalid autowire-marked constructor: " + candidate +
-										". Found constructor with 'required' Autowired annotation already: " +
-										requiredConstructor);
+												". Found constructor with 'required' Autowired annotation already: " +
+												requiredConstructor);
 							}
 							boolean required = determineRequiredStatus(ann);
 							if (required) {
 								if (!candidates.isEmpty()) {
 									throw new BeanCreationException(beanName,
 											"Invalid autowire-marked constructors: " + candidates +
-											". Found constructor with 'required' Autowired annotation: " +
-											candidate);
+													". Found constructor with 'required' Autowired annotation: " +
+													candidate);
 								}
 								requiredConstructor = candidate;
 							}
 							candidates.add(candidate);
-						}
-						else if (candidate.getParameterCount() == 0) {
+						} else if (candidate.getParameterCount() == 0) {
 							defaultConstructor = candidate;
 						}
 					}
@@ -437,8 +433,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 						if (requiredConstructor == null) {
 							if (defaultConstructor != null) {
 								candidates.add(defaultConstructor);
-							}
-							else if (candidates.size() == 1 && logger.isInfoEnabled()) {
+							} else if (candidates.size() == 1 && logger.isInfoEnabled()) {
 								logger.info("Inconsistent constructor declaration on bean with name '" + beanName +
 										"': single autowire-marked constructor flagged as optional - " +
 										"this constructor is effectively required since there is no " +
@@ -446,18 +441,14 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 							}
 						}
 						candidateConstructors = candidates.toArray(EMPTY_CONSTRUCTOR_ARRAY);
-					}
-					else if (rawCandidates.length == 1 && rawCandidates[0].getParameterCount() > 0) {
-						candidateConstructors = new Constructor<?>[] {rawCandidates[0]};
-					}
-					else if (nonSyntheticConstructors == 2 && primaryConstructor != null &&
+					} else if (rawCandidates.length == 1 && rawCandidates[0].getParameterCount() > 0) {
+						candidateConstructors = new Constructor<?>[]{rawCandidates[0]};
+					} else if (nonSyntheticConstructors == 2 && primaryConstructor != null &&
 							defaultConstructor != null && !primaryConstructor.equals(defaultConstructor)) {
-						candidateConstructors = new Constructor<?>[] {primaryConstructor, defaultConstructor};
-					}
-					else if (nonSyntheticConstructors == 1 && primaryConstructor != null) {
-						candidateConstructors = new Constructor<?>[] {primaryConstructor};
-					}
-					else {
+						candidateConstructors = new Constructor<?>[]{primaryConstructor, defaultConstructor};
+					} else if (nonSyntheticConstructors == 1 && primaryConstructor != null) {
+						candidateConstructors = new Constructor<?>[]{primaryConstructor};
+					} else {
 						candidateConstructors = EMPTY_CONSTRUCTOR_ARRAY;
 					}
 					this.candidateConstructorsCache.put(beanClass, candidateConstructors);
@@ -482,8 +473,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 									RootBeanDefinition mbd = (RootBeanDefinition)
 											this.beanFactory.getMergedBeanDefinition(beanName);
 									mbd.getMethodOverrides().addOverride(override);
-								}
-								catch (NoSuchBeanDefinitionException ex) {
+								} catch (NoSuchBeanDefinitionException ex) {
 									throw new BeanCreationException(beanName,
 											"Cannot apply @Lookup to beans without corresponding bean definition");
 								}
@@ -493,8 +483,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 					}
 					while (targetClass != null && targetClass != Object.class);
 
-				}
-				catch (IllegalStateException ex) {
+				} catch (IllegalStateException ex) {
 					throw new BeanCreationException(beanName, "Lookup method resolution failed", ex);
 				}
 			}
@@ -504,14 +493,13 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 	@Override
 	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
+		// 找注入点（所有被@Autowired注解了的Field或Method）
 		InjectionMetadata metadata = findAutowiringMetadata(beanName, bean.getClass(), pvs);
 		try {
 			metadata.inject(bean, beanName, pvs);
-		}
-		catch (BeanCreationException ex) {
+		} catch (BeanCreationException ex) {
 			throw ex;
-		}
-		catch (Throwable ex) {
+		} catch (Throwable ex) {
 			throw new BeanCreationException(beanName, "Injection of autowired dependencies failed", ex);
 		}
 		return pvs;
@@ -521,6 +509,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	 * <em>Native</em> processing method for direct calls with an arbitrary target
 	 * instance, resolving all of its fields and methods which are annotated with
 	 * one of the configured 'autowired' annotation types.
+	 *
 	 * @param bean the target instance to process
 	 * @throws BeanCreationException if autowiring failed
 	 * @see #setAutowiredAnnotationTypes(Set)
@@ -530,11 +519,9 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		InjectionMetadata metadata = findAutowiringMetadata(clazz.getName(), clazz, null);
 		try {
 			metadata.inject(bean, null, null);
-		}
-		catch (BeanCreationException ex) {
+		} catch (BeanCreationException ex) {
 			throw ex;
-		}
-		catch (Throwable ex) {
+		} catch (Throwable ex) {
 			throw new BeanCreationException(
 					"Injection of autowired dependencies failed for class [" + clazz + "]", ex);
 		}
@@ -640,6 +627,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	 * <p>A 'required' dependency means that autowiring should fail when no beans
 	 * are found. Otherwise, the autowiring process will simply bypass the field
 	 * or method when no beans are found.
+	 *
 	 * @param ann the Autowired annotation
 	 * @return whether the annotation indicates that a dependency is required
 	 */
@@ -666,7 +654,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 					List<InjectionMetadata.InjectedElement> candidateMethods = new ArrayList<>(methodElements);
 					List<InjectionMetadata.InjectedElement> selectedMethods = new ArrayList<>(asmMethods.size());
 					for (MethodMetadata asmMethod : asmMethods) {
-						for (Iterator<InjectionMetadata.InjectedElement> it = candidateMethods.iterator(); it.hasNext();) {
+						for (Iterator<InjectionMetadata.InjectedElement> it = candidateMethods.iterator(); it.hasNext(); ) {
 							InjectionMetadata.InjectedElement element = it.next();
 							if (element.getMember().getName().equals(asmMethod.getMethodName())) {
 								selectedMethods.add(element);
@@ -680,8 +668,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 						return selectedMethods;
 					}
 				}
-			}
-			catch (IOException ex) {
+			} catch (IOException ex) {
 				logger.debug("Failed to read class file via ASM for determining @Autowired method order", ex);
 				// No worries, let's continue with the reflection metadata we started with...
 			}
@@ -714,8 +701,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		if (cachedArgument instanceof DependencyDescriptor descriptor) {
 			Assert.state(this.beanFactory != null, "No BeanFactory available");
 			return this.beanFactory.resolveDependency(descriptor, beanName, null, null);
-		}
-		else {
+		} else {
 			return cachedArgument;
 		}
 	}
@@ -756,15 +742,13 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			if (this.cached) {
 				try {
 					value = resolveCachedArgument(beanName, this.cachedFieldValue);
-				}
-				catch (BeansException ex) {
+				} catch (BeansException ex) {
 					// Unexpected target bean mismatch for cached argument -> re-resolve
 					this.cached = false;
 					logger.debug("Failed to resolve cached argument", ex);
 					value = resolveFieldValue(field, bean, beanName);
 				}
-			}
-			else {
+			} else {
 				value = resolveFieldValue(field, bean, beanName);
 			}
 			if (value != null) {
@@ -783,8 +767,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			Object value;
 			try {
 				value = beanFactory.resolveDependency(desc, beanName, autowiredBeanNames, typeConverter);
-			}
-			catch (BeansException ex) {
+			} catch (BeansException ex) {
 				throw new UnsatisfiedDependencyException(null, beanName, new InjectionPoint(field), ex);
 			}
 			synchronized (this) {
@@ -801,8 +784,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 						}
 						this.cachedFieldValue = cachedFieldValue;
 						this.cached = true;
-					}
-					else {
+					} else {
 						this.cachedFieldValue = null;
 						// cached flag remains false
 					}
@@ -829,6 +811,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 		@Override
 		protected void inject(Object bean, @Nullable String beanName, @Nullable PropertyValues pvs) throws Throwable {
+			// 如果pvs中已经有当前注入点的值了，则跳过注入
 			if (!shouldInject(pvs)) {
 				return;
 			}
@@ -837,23 +820,20 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			if (this.cached) {
 				try {
 					arguments = resolveCachedArguments(beanName, this.cachedMethodArguments);
-				}
-				catch (BeansException ex) {
+				} catch (BeansException ex) {
 					// Unexpected target bean mismatch for cached argument -> re-resolve
 					this.cached = false;
 					logger.debug("Failed to resolve cached argument", ex);
 					arguments = resolveMethodArguments(method, bean, beanName);
 				}
-			}
-			else {
+			} else {
 				arguments = resolveMethodArguments(method, bean, beanName);
 			}
 			if (arguments != null) {
 				try {
 					ReflectionUtils.makeAccessible(method);
 					method.invoke(bean, arguments);
-				}
-				catch (InvocationTargetException ex) {
+				} catch (InvocationTargetException ex) {
 					throw ex.getTargetException();
 				}
 			}
@@ -891,8 +871,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 						break;
 					}
 					arguments[i] = arg;
-				}
-				catch (BeansException ex) {
+				} catch (BeansException ex) {
 					throw new UnsatisfiedDependencyException(null, beanName, new InjectionPoint(methodParam), ex);
 				}
 			}
@@ -915,8 +894,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 						}
 						this.cachedMethodArguments = cachedMethodArguments;
 						this.cached = true;
-					}
-					else {
+					} else {
 						this.cachedMethodArguments = null;
 						// cached flag remains false
 					}
@@ -964,7 +942,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		private final AutowireCandidateResolver candidateResolver;
 
 		AotContribution(Class<?> target, Collection<AutowiredElement> autowiredElements,
-				@Nullable AutowireCandidateResolver candidateResolver) {
+						@Nullable AutowireCandidateResolver candidateResolver) {
 
 			this.target = target;
 			this.autowiredElements = autowiredElements;
@@ -999,7 +977,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		}
 
 		private CodeBlock generateMethodCode(CodeWarnings codeWarnings,
-				ClassName targetClassName, RuntimeHints hints) {
+											 ClassName targetClassName, RuntimeHints hints) {
 
 			CodeBlock.Builder code = CodeBlock.builder();
 			for (AutowiredElement autowiredElement : this.autowiredElements) {
@@ -1011,7 +989,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		}
 
 		private CodeBlock generateMethodStatementForElement(CodeWarnings codeWarnings,
-				ClassName targetClassName, AutowiredElement autowiredElement, RuntimeHints hints) {
+															ClassName targetClassName, AutowiredElement autowiredElement, RuntimeHints hints) {
 
 			Member member = autowiredElement.getMember();
 			boolean required = autowiredElement.required;
@@ -1028,7 +1006,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		}
 
 		private CodeBlock generateMethodStatementForField(CodeWarnings codeWarnings,
-				ClassName targetClassName, Field field, boolean required, RuntimeHints hints) {
+														  ClassName targetClassName, Field field, boolean required, RuntimeHints hints) {
 
 			hints.reflection().registerField(field);
 			CodeBlock resolver = CodeBlock.of("$T.$L($S)",
@@ -1038,8 +1016,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			if (!accessControl.isAccessibleFrom(targetClassName)) {
 				return CodeBlock.of("$L.resolveAndSet($L, $L)", resolver,
 						REGISTERED_BEAN_PARAMETER, INSTANCE_PARAMETER);
-			}
-			else {
+			} else {
 				codeWarnings.detectDeprecation(field);
 				return CodeBlock.of("$L.$L = $L.resolve($L)", INSTANCE_PARAMETER,
 						field.getName(), resolver, REGISTERED_BEAN_PARAMETER);
@@ -1047,7 +1024,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		}
 
 		private CodeBlock generateMethodStatementForMethod(CodeWarnings codeWarnings,
-				ClassName targetClassName, Method method, boolean required, RuntimeHints hints) {
+														   ClassName targetClassName, Method method, boolean required, RuntimeHints hints) {
 
 			CodeBlock.Builder code = CodeBlock.builder();
 			code.add("$T.$L", AutowiredMethodArgumentsResolver.class,
@@ -1062,8 +1039,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			if (!accessControl.isAccessibleFrom(targetClassName)) {
 				hints.reflection().registerMethod(method, ExecutableMode.INVOKE);
 				code.add(".resolveAndInvoke($L, $L)", REGISTERED_BEAN_PARAMETER, INSTANCE_PARAMETER);
-			}
-			else {
+			} else {
 				codeWarnings.detectDeprecation(method);
 				hints.reflection().registerMethod(method, ExecutableMode.INTROSPECT);
 				CodeBlock arguments = new AutowiredArgumentsCodeGenerator(this.target,
