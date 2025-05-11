@@ -47,6 +47,10 @@ import org.springframework.lang.Nullable;
  */
 public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotationAutowireCandidateResolver {
 
+	/**
+	 * 判断是不是懒注入 @Autowired+@Lazy
+	 * 如果是则会在注入时先生成一个代理对象注入给属性，所以能注入并不代表属性为null
+	 */
 	@Override
 	@Nullable
 	public Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, @Nullable String beanName) {
@@ -60,12 +64,14 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 	}
 
 	protected boolean isLazy(DependencyDescriptor descriptor) {
+		// 属性是否有@Lazy注解
 		for (Annotation ann : descriptor.getAnnotations()) {
 			Lazy lazy = AnnotationUtils.getAnnotation(ann, Lazy.class);
 			if (lazy != null && lazy.value()) {
 				return true;
 			}
 		}
+		// 方法参数是否有@Lazy注解
 		MethodParameter methodParam = descriptor.getMethodParameter();
 		if (methodParam != null) {
 			Method method = methodParam.getMethod();
@@ -99,6 +105,7 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 			pf.addInterface(dependencyType);
 		}
 		ClassLoader classLoader = dlbf.getBeanClassLoader();
+		// 产生代理对象
 		return (classOnly ? pf.getProxyClass(classLoader) : pf.getProxy(classLoader));
 	}
 
@@ -117,7 +124,7 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 		private transient volatile Object cachedTarget;
 
 		public LazyDependencyTargetSource(DefaultListableBeanFactory beanFactory,
-				DependencyDescriptor descriptor, @Nullable String beanName) {
+										  DependencyDescriptor descriptor, @Nullable String beanName) {
 
 			this.beanFactory = beanFactory;
 			this.descriptor = descriptor;
@@ -145,29 +152,22 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 				Class<?> type = getTargetClass();
 				if (Map.class == type) {
 					target = Collections.emptyMap();
-				}
-				else if (List.class == type) {
+				} else if (List.class == type) {
 					target = Collections.emptyList();
-				}
-				else if (Set.class == type || Collection.class == type) {
+				} else if (Set.class == type || Collection.class == type) {
 					target = Collections.emptySet();
-				}
-				else {
+				} else {
 					throw new NoSuchBeanDefinitionException(this.descriptor.getResolvableType(),
 							"Optional dependency not present for lazy injection point");
 				}
-			}
-			else {
+			} else {
 				if (target instanceof Map<?, ?> map && Map.class == getTargetClass()) {
 					target = Collections.unmodifiableMap(map);
-				}
-				else if (target instanceof List<?> list && List.class == getTargetClass()) {
+				} else if (target instanceof List<?> list && List.class == getTargetClass()) {
 					target = Collections.unmodifiableList(list);
-				}
-				else if (target instanceof Set<?> set && Set.class == getTargetClass()) {
+				} else if (target instanceof Set<?> set && Set.class == getTargetClass()) {
 					target = Collections.unmodifiableSet(set);
-				}
-				else if (target instanceof Collection<?> coll && Collection.class == getTargetClass()) {
+				} else if (target instanceof Collection<?> coll && Collection.class == getTargetClass()) {
 					target = Collections.unmodifiableCollection(coll);
 				}
 			}
@@ -176,8 +176,7 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 			for (String autowiredBeanName : autowiredBeanNames) {
 				if (!this.beanFactory.containsBean(autowiredBeanName)) {
 					cacheable = false;
-				}
-				else {
+				} else {
 					if (this.beanName != null) {
 						this.beanFactory.registerDependentBean(autowiredBeanName, this.beanName);
 					}

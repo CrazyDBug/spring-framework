@@ -753,6 +753,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 			// allowing for late bean retrieval by on-demand suppliers etc.
 			this.singletonLock.lock();
 			try {
+				// 从单例池移除
 				removeSingleton(beanName);
 			} finally {
 				this.singletonLock.unlock();
@@ -769,6 +770,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	protected void destroyBean(String beanName, @Nullable DisposableBean bean) {
 		// Trigger destruction of dependent beans first...
+		// 销毁Bean时，如果该Bean被某些Bean依赖，也要销毁对应的依赖
 		Set<String> dependentBeanNames;
 		synchronized (this.dependentBeanMap) {
 			// Within full synchronization in order to guarantee a disconnected Set

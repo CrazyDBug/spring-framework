@@ -154,15 +154,18 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	 */
 	@Override
 	public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
+		// 先执行上层判断，如果匹配成功，再由自己匹配
 		if (!super.isAutowireCandidate(bdHolder, descriptor)) {
 			return false;
 		}
+		// descriptor.getAnnotations()拿的是属性或方法参数前的注释，拿不到方法上的注解
 		Boolean checked = checkQualifiers(bdHolder, descriptor.getAnnotations());
 		if (checked != Boolean.FALSE) {
 			MethodParameter methodParam = descriptor.getMethodParameter();
 			if (methodParam != null) {
 				Method method = methodParam.getMethod();
 				if (method == null || void.class == method.getReturnType()) {
+					//  methodParam.getMethodAnnotations() 实际上是拿的方法上的注解
 					Boolean methodChecked = checkQualifiers(bdHolder, methodParam.getMethodAnnotations());
 					if (methodChecked != null && checked == null) {
 						checked = methodChecked;
@@ -193,8 +196,10 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 				}
 				boolean checkMeta = true;
 				boolean fallbackToMeta = false;
+				// 当前注解是否是 Qualifier
 				if (isQualifier(type)) {
 					qualifierFound = true;
+					// 当前注解是否是 Qualifier，如果和当前BeanDefinition不匹配，则fallBackMeta为true,checkMeta依然为
 					if (!checkQualifier(bdHolder, annotation, typeConverter)) {
 						fallbackToMeta = true;
 					}
@@ -401,6 +406,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	public Object getSuggestedValue(DependencyDescriptor descriptor) {
 		Object value = findValue(descriptor.getAnnotations());
 		if (value == null) {
+			// 方法参数
 			MethodParameter methodParam = descriptor.getMethodParameter();
 			if (methodParam != null) {
 				value = findValue(methodParam.getMethodAnnotations());

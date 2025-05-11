@@ -646,10 +646,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 						throw new BeanCurrentlyInCreationException(beanName,
 								"Bean with name '" + beanName + "' has been injected into other beans [" +
 										StringUtils.collectionToCommaDelimitedString(actualDependentBeans) +
-										"] in its raw version as part of a circular reference, but has eventually been " +
-										"wrapped. This means that said other beans do not use the final version of the " +
-										"bean. This is often the result of over-eager type matching - consider using " +
-										"'getBeanNamesForType' with the 'allowEagerInit' flag turned off, for example.");
+										"] in its raw version as part of a circular reference, but has eventually " +
+										"been" +
+										" " +
+										"wrapped. This means that said other beans do not use the final version of " +
+										"the" +
+										" " +
+										"bean. This is often the result of over-eager type matching - consider using" +
+										" " +
+										"'getBeanNamesForType' with the 'allowEagerInit' flag turned off, for " +
+										"example" +
+										".");
 					}
 				}
 			}
@@ -787,11 +794,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 									paramNames = pnd.getParameterNames(candidate);
 								}
 							}
-							Set<ConstructorArgumentValues.ValueHolder> usedValueHolders = CollectionUtils.newHashSet(paramTypes.length);
+							Set<ConstructorArgumentValues.ValueHolder> usedValueHolders =
+									CollectionUtils.newHashSet(paramTypes.length);
 							Object[] args = new Object[paramTypes.length];
 							for (int i = 0; i < args.length; i++) {
 								ConstructorArgumentValues.ValueHolder valueHolder = cav.getArgumentValue(
-										i, paramTypes[i], (paramNames != null ? paramNames[i] : null), usedValueHolders);
+										i, paramTypes[i], (paramNames != null ? paramNames[i] : null),
+										usedValueHolders);
 								if (valueHolder == null) {
 									valueHolder = cav.getGenericArgumentValue(null, null, usedValueHolders);
 								}
@@ -1118,7 +1127,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param beanName the name of the bean
 	 * @see MergedBeanDefinitionPostProcessor#postProcessMergedBeanDefinition
 	 */
-	protected void applyMergedBeanDefinitionPostProcessors(RootBeanDefinition mbd, Class<?> beanType, String beanName) {
+	protected void applyMergedBeanDefinitionPostProcessors(RootBeanDefinition mbd, Class<?> beanType,
+														   String beanName) {
 		for (MergedBeanDefinitionPostProcessor processor : getBeanPostProcessorCache().mergedDefinition) {
 			processor.postProcessMergedBeanDefinition(mbd, beanType, beanName);
 		}
@@ -1335,7 +1345,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor#determineCandidateConstructors
 	 */
 	@Nullable
-	protected Constructor<?>[] determineConstructorsFromBeanPostProcessors(@Nullable Class<?> beanClass, String beanName)
+	protected Constructor<?>[] determineConstructorsFromBeanPostProcessors(@Nullable Class<?> beanClass,
+																		   String beanName)
 			throws BeansException {
 
 		if (beanClass != null && hasInstantiationAwareBeanPostProcessors()) {
@@ -1375,7 +1386,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param beanName     the name of the bean
 	 * @param mbd          the bean definition for the bean
 	 * @param explicitArgs argument values passed in programmatically via the getBean method,
-	 *                     or {@code null} if none (implying the use of constructor argument values from bean definition)
+	 *                     or {@code null} if none (implying the use of constructor argument values from bean
+	 *                     definition)
 	 * @return a BeanWrapper for the new instance
 	 * @see #getBean(String, Object[])
 	 */
@@ -1397,11 +1409,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param mbd          the bean definition for the bean
 	 * @param ctors        the chosen candidate constructors
 	 * @param explicitArgs argument values passed in programmatically via the getBean method,
-	 *                     or {@code null} if none (implying the use of constructor argument values from bean definition)
+	 *                     or {@code null} if none (implying the use of constructor argument values from bean
+	 *                     definition)
 	 * @return a BeanWrapper for the new instance
 	 */
 	protected BeanWrapper autowireConstructor(
-			String beanName, RootBeanDefinition mbd, @Nullable Constructor<?>[] ctors, @Nullable Object[] explicitArgs) {
+			String beanName, RootBeanDefinition mbd, @Nullable Constructor<?>[] ctors,
+			@Nullable Object[] explicitArgs) {
 
 		return new ConstructorResolver(this).autowireConstructor(beanName, mbd, ctors, explicitArgs);
 	}
@@ -1487,6 +1501,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			checkDependencies(beanName, mbd, filteredPds, pvs);
 		}
 
+		// 如果当前Bean的BeanDefinition中设置了PropertyValues,那么最终将是PropertyValues中的值，覆盖@Autowired
 		if (pvs != null) {
 			applyPropertyValues(beanName, mbd, bw, pvs);
 		}
@@ -1505,11 +1520,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected void autowireByName(
 			String beanName, AbstractBeanDefinition mbd, BeanWrapper bw, MutablePropertyValues pvs) {
 
+		// 当前Bean中能进行自动注入的属性名
 		String[] propertyNames = unsatisfiedNonSimpleProperties(mbd, bw);
+		// 遍历每个属性名，并去获取Bean对象，并设置到pvs
 		for (String propertyName : propertyNames) {
 			if (containsBean(propertyName)) {
 				Object bean = getBean(propertyName);
 				pvs.add(propertyName, bean);
+				// 记录 propertyName对应的Bean被beanName给依赖了
 				registerDependentBean(propertyName, beanName);
 				if (logger.isTraceEnabled()) {
 					logger.trace("Added autowiring by name from bean name '" + beanName +
@@ -1544,6 +1562,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			converter = bw;
 		}
 
+		// 当前Bean能够进行自动注入的属性名
 		String[] propertyNames = unsatisfiedNonSimpleProperties(mbd, bw);
 		Set<String> autowiredBeanNames = new LinkedHashSet<>(propertyNames.length * 2);
 		for (String propertyName : propertyNames) {
@@ -1556,6 +1575,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					// Do not allow eager init for type matching in case of a prioritized post-processor.
 					boolean eager = !(bw.getWrappedInstance() instanceof PriorityOrdered);
 					DependencyDescriptor desc = new AutowireByTypeDependencyDescriptor(methodParam, eager);
+					// 根据类型找到结果
 					Object autowiredArgument = resolveDependency(desc, beanName, autowiredBeanNames, converter);
 					if (autowiredArgument != null) {
 						pvs.add(propertyName, autowiredArgument);
@@ -1589,7 +1609,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected String[] unsatisfiedNonSimpleProperties(AbstractBeanDefinition mbd, BeanWrapper bw) {
 		Set<String> result = new TreeSet<>();
 		PropertyValues pvs = mbd.getPropertyValues();
+		// 属性描述器
 		PropertyDescriptor[] pds = bw.getPropertyDescriptors();
+		// 什么样的属性可以进行自动注入
+		// 1. 该属性有对应的set方法
+		// 2. 没有在ignoreDependencyTypes中
+		// 3. 如果该属性对应的set方法是实现某个接口中所定义的，那么接口没有在ignoreDependencyInterfaces中
+		// 4. 属性类型不是简单类型，比如int,Integer，int[]
 		for (PropertyDescriptor pd : pds) {
 			if (pd.getWriteMethod() != null && !isExcludedFromDependencyCheck(pd) && !pvs.contains(pd.getName()) &&
 					!BeanUtils.isSimpleProperty(pd.getPropertyType())) {

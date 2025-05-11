@@ -563,7 +563,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected boolean isTypeMatch(String name, ResolvableType typeToMatch, boolean allowFactoryBeanInit)
 			throws NoSuchBeanDefinitionException {
 
+		// 判断name所对应的Bean的类型是不是typeToMatch
+		// allowFactoryBeanInit表示允不允许在这里实例化FactoryBean对象
+
+		// 如果name是&xxx,那么beanName就是xxx
 		String beanName = transformedBeanName(name);
+		// name不是&xxx
 		boolean isFactoryDereference = BeanFactoryUtils.isFactoryDereference(name);
 
 		// Check manually registered singletons.
@@ -573,6 +578,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			// Determine target for FactoryBean match if necessary.
 			if (beanInstance instanceof FactoryBean<?> factoryBean) {
 				if (!isFactoryDereference) {
+					// 调用factoryBean.getObjectType()
 					Class<?> type = getTypeForFactoryBean(factoryBean);
 					if (type == null) {
 						return false;
@@ -643,6 +649,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			return parentBeanFactory.isTypeMatch(originalBeanName(name), typeToMatch);
 		}
 
+		//单例池没有name对应的Bean对象，就只能根据BeanDefinition来判断类型了
 		// Retrieve corresponding bean definition.
 		RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 		BeanDefinitionHolder dbd = mbd.getDecoratedDefinition();
@@ -1596,6 +1603,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			if (mbd.hasBeanClass()) {
 				return mbd.getBeanClass();
 			}
+			// 如果BeanClass没有被加载
 			Class<?> beanClass = doResolveBeanClass(mbd, typesToMatch);
 			if (mbd.hasBeanClass()) {
 				mbd.prepareMethodOverrides();
@@ -1604,7 +1612,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		} catch (ClassNotFoundException ex) {
 			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), ex);
 		} catch (LinkageError err) {
-			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), err);
+			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(),
+					err);
 		} catch (BeanDefinitionValidationException ex) {
 			throw new BeanDefinitionStoreException(mbd.getResourceDescription(),
 					beanName, "Validation of method overrides failed", ex);
@@ -1947,6 +1956,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @see org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor
 	 */
 	protected boolean requiresDestruction(Object bean, RootBeanDefinition mbd) {
+		// 是否存在销毁方法
 		return (bean.getClass() != NullBean.class && (DisposableBeanAdapter.hasDestroyMethod(bean, mbd) ||
 				(hasDestructionAwareBeanPostProcessors() && DisposableBeanAdapter.hasApplicableProcessors(
 						bean, getBeanPostProcessorCache().destructionAware))));
@@ -2021,7 +2031,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 *
 	 * @param beanName the name of the bean to find a definition for
 	 * @return the BeanDefinition for this prototype name (never {@code null})
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException if the bean definition cannot be resolved
+	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException if the bean definition cannot be
+	 *                                                                         resolved
 	 * @throws BeansException                                                  in case of errors
 	 * @see RootBeanDefinition
 	 * @see ChildBeanDefinition

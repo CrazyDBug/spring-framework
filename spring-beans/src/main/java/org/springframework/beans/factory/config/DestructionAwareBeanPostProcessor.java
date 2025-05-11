@@ -27,7 +27,7 @@ import org.springframework.beans.BeansException;
  * @author Juergen Hoeller
  * @since 1.0.1
  */
-public interface DestructionAwareBeanPostProcessor extends BeanPostProcessor {
+public interface  DestructionAwareBeanPostProcessor extends BeanPostProcessor {
 
 	/**
 	 * Apply this BeanPostProcessor to the given bean instance before its

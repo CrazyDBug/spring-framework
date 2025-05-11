@@ -79,9 +79,9 @@ import org.springframework.util.ReflectionUtils;
  * @author Stephane Nicoll
  * @author Phillip Webb
  * @author Sam Brannen
- * @since 2.5
  * @see #setInitAnnotationType
  * @see #setDestroyAnnotationType
+ * @since 2.5
  */
 @SuppressWarnings("serial")
 public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareBeanPostProcessor,
@@ -92,12 +92,15 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 				@Override
 				public void checkInitDestroyMethods(RootBeanDefinition beanDefinition) {
 				}
+
 				@Override
 				public void invokeInitMethods(Object target, String beanName) {
 				}
+
 				@Override
 				public void invokeDestroyMethods(Object target, String beanName) {
 				}
+
 				@Override
 				public boolean hasDestroyMethods() {
 					return false;
@@ -123,6 +126,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	 * <p>Any custom annotation can be used, since there are no required
 	 * annotation attributes. There is no default, although a typical choice
 	 * is the {@link jakarta.annotation.PostConstruct} annotation.
+	 *
 	 * @see #addInitAnnotationType
 	 */
 	public void setInitAnnotationType(Class<? extends Annotation> initAnnotationType) {
@@ -133,8 +137,9 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	/**
 	 * Add an init annotation to check for, indicating initialization
 	 * methods to call after configuration of a bean.
-	 * @since 6.0.11
+	 *
 	 * @see #setInitAnnotationType
+	 * @since 6.0.11
 	 */
 	public void addInitAnnotationType(@Nullable Class<? extends Annotation> initAnnotationType) {
 		if (initAnnotationType != null) {
@@ -148,6 +153,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	 * <p>Any custom annotation can be used, since there are no required
 	 * annotation attributes. There is no default, although a typical choice
 	 * is the {@link jakarta.annotation.PreDestroy} annotation.
+	 *
 	 * @see #addDestroyAnnotationType
 	 */
 	public void setDestroyAnnotationType(Class<? extends Annotation> destroyAnnotationType) {
@@ -158,8 +164,9 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	/**
 	 * Add a destroy annotation to check for, indicating destruction
 	 * methods to call when the context is shutting down.
-	 * @since 6.0.11
+	 *
 	 * @see #setDestroyAnnotationType
+	 * @since 6.0.11
 	 */
 	public void addDestroyAnnotationType(@Nullable Class<? extends Annotation> destroyAnnotationType) {
 		if (destroyAnnotationType != null) {
@@ -217,11 +224,9 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 		LifecycleMetadata metadata = findLifecycleMetadata(bean.getClass());
 		try {
 			metadata.invokeInitMethods(bean, beanName);
-		}
-		catch (InvocationTargetException ex) {
+		} catch (InvocationTargetException ex) {
 			throw new BeanCreationException(beanName, "Invocation of init method failed", ex.getTargetException());
-		}
-		catch (Throwable ex) {
+		} catch (Throwable ex) {
 			throw new BeanCreationException(beanName, "Failed to invoke init method", ex);
 		}
 		return bean;
@@ -237,17 +242,14 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 		LifecycleMetadata metadata = findLifecycleMetadata(bean.getClass());
 		try {
 			metadata.invokeDestroyMethods(bean, beanName);
-		}
-		catch (InvocationTargetException ex) {
+		} catch (InvocationTargetException ex) {
 			String msg = "Destroy method on bean with name '" + beanName + "' threw an exception";
 			if (logger.isDebugEnabled()) {
 				logger.warn(msg, ex.getTargetException());
-			}
-			else if (logger.isWarnEnabled()) {
+			} else if (logger.isWarnEnabled()) {
 				logger.warn(msg + ": " + ex.getTargetException());
 			}
-		}
-		catch (Throwable ex) {
+		} catch (Throwable ex) {
 			if (logger.isWarnEnabled()) {
 				logger.warn("Failed to invoke destroy method on bean with name '" + beanName + "'", ex);
 			}
@@ -313,6 +315,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 				}
 			});
 
+			// 父类的在前面
 			initMethods.addAll(0, currInitMethods);
 			destroyMethods.addAll(currDestroyMethods);
 			currentClass = currentClass.getSuperclass();
@@ -355,7 +358,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 		private volatile Set<LifecycleMethod> checkedDestroyMethods;
 
 		public LifecycleMetadata(Class<?> beanClass, Collection<LifecycleMethod> initMethods,
-				Collection<LifecycleMethod> destroyMethods) {
+								 Collection<LifecycleMethod> destroyMethods) {
 
 			this.beanClass = beanClass;
 			this.initMethods = initMethods;
@@ -471,6 +474,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 		/**
 		 * Determine if the supplied lifecycle {@link Method} is private or not
 		 * visible to the supplied bean {@link Class}.
+		 *
 		 * @since 6.0.11
 		 */
 		private static boolean isPrivateOrNotVisible(Method method, Class<?> beanClass) {

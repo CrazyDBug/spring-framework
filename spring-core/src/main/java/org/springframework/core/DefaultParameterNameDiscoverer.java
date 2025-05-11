@@ -29,9 +29,9 @@ package org.springframework.core;
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
  * @author Sam Brannen
- * @since 4.0
  * @see StandardReflectionParameterNameDiscoverer
  * @see KotlinReflectionParameterNameDiscoverer
+ * @since 4.0
  */
 public class DefaultParameterNameDiscoverer extends PrioritizedParameterNameDiscoverer {
 
@@ -41,6 +41,7 @@ public class DefaultParameterNameDiscoverer extends PrioritizedParameterNameDisc
 		}
 
 		// Recommended approach on Java 8+: compilation with -parameters.
+		// 获取某个方法的参数名 反射1.8
 		addDiscoverer(new StandardReflectionParameterNameDiscoverer());
 	}
 

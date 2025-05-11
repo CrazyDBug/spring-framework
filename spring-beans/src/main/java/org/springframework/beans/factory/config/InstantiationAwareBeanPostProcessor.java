@@ -95,6 +95,7 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	}
 
 	/**
+	 * 处理属性
 	 * Post-process the given property values before the factory applies them
 	 * to the given bean.
 	 * <p>The default implementation returns the given {@code pvs} as-is.
@@ -110,7 +111,6 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	@Nullable
 	default PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName)
 			throws BeansException {
-
 		return pvs;
 	}
 
