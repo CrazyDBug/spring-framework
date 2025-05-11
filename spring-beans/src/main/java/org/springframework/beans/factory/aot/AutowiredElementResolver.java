@@ -41,7 +41,7 @@ abstract class AutowiredElementResolver {
 	private final Log logger = LogFactory.getLog(getClass());
 
 	protected final void registerDependentBeans(ConfigurableBeanFactory beanFactory,
-			String beanName, Set<String> autowiredBeanNames) {
+												String beanName, Set<String> autowiredBeanNames) {
 
 		for (String autowiredBeanName : autowiredBeanNames) {
 			if (beanFactory.containsBean(autowiredBeanName)) {

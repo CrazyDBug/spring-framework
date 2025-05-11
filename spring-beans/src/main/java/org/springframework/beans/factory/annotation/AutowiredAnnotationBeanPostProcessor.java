@@ -716,6 +716,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	@Nullable
 	private Object resolveCachedArgument(@Nullable String beanName, @Nullable Object cachedArgument) {
 		if (cachedArgument instanceof DependencyDescriptor descriptor) {
+			// 拿到的是 ShortcutDependencyDescriptor
 			Assert.state(this.beanFactory != null, "No BeanFactory available");
 			return this.beanFactory.resolveDependency(descriptor, beanName, null, null);
 		} else {
@@ -797,11 +798,13 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 				if (!this.cached) {
 					if (value != null || this.required) {
 						Object cachedFieldValue = desc;
+						// 注册一下beanName依赖了autowiredBeanNames
 						registerDependentBeans(beanName, autowiredBeanNames);
 						if (value != null && autowiredBeanNames.size() == 1) {
 							String autowiredBeanName = autowiredBeanNames.iterator().next();
 							if (beanFactory.containsBean(autowiredBeanName) &&
 									beanFactory.isTypeMatch(autowiredBeanName, field.getType())) {
+								// 构造一个 ShortcutDependencyDescriptor 作为缓存，保存了当前field所匹配的 autowiredName
 								cachedFieldValue = new ShortcutDependencyDescriptor(desc, autowiredBeanName);
 							}
 						}

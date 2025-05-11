@@ -49,6 +49,7 @@ public class InjectionMetadata {
 
 	/**
 	 * An empty {@code InjectionMetadata} instance with no-op callbacks.
+	 *
 	 * @since 5.2
 	 */
 	public static final InjectionMetadata EMPTY = new InjectionMetadata(Object.class, Collections.emptyList()) {
@@ -56,12 +57,15 @@ public class InjectionMetadata {
 		protected boolean needsRefresh(Class<?> clazz) {
 			return false;
 		}
+
 		@Override
 		public void checkConfigMembers(RootBeanDefinition beanDefinition) {
 		}
+
 		@Override
 		public void inject(Object target, @Nullable String beanName, @Nullable PropertyValues pvs) {
 		}
+
 		@Override
 		public void clear(@Nullable PropertyValues pvs) {
 		}
@@ -80,8 +84,9 @@ public class InjectionMetadata {
 	 * Create a new {@code InjectionMetadata instance}.
 	 * <p>Preferably use {@link #forElements} for reusing the {@link #EMPTY}
 	 * instance in case of no elements.
+	 *
 	 * @param targetClass the target class
-	 * @param elements the associated elements to inject
+	 * @param elements    the associated elements to inject
 	 * @see #forElements
 	 */
 	public InjectionMetadata(Class<?> targetClass, Collection<InjectedElement> elements) {
@@ -92,6 +97,7 @@ public class InjectionMetadata {
 
 	/**
 	 * Return the {@link InjectedElement elements} to inject.
+	 *
 	 * @return the elements to inject
 	 */
 	public Collection<InjectedElement> getInjectedElements() {
@@ -102,6 +108,7 @@ public class InjectionMetadata {
 	 * Return the {@link InjectedElement elements} to inject based on the
 	 * specified {@link PropertyValues}. If a property is already defined
 	 * for an {@link InjectedElement}, it is excluded.
+	 *
 	 * @param pvs the property values to consider
 	 * @return the elements to inject
 	 * @since 6.0.10
@@ -112,6 +119,7 @@ public class InjectionMetadata {
 
 	/**
 	 * Determine whether this metadata instance needs to be refreshed.
+	 *
 	 * @param clazz the current target class
 	 * @return {@code true} indicating a refresh, {@code false} otherwise
 	 * @since 5.2.4
@@ -123,8 +131,7 @@ public class InjectionMetadata {
 	public void checkConfigMembers(RootBeanDefinition beanDefinition) {
 		if (this.injectedElements.isEmpty()) {
 			this.checkedElements = Collections.emptySet();
-		}
-		else {
+		} else {
 			Set<InjectedElement> checkedElements = CollectionUtils.newLinkedHashSet(this.injectedElements.size());
 			for (InjectedElement element : this.injectedElements) {
 				Member member = element.getMember();
@@ -151,6 +158,7 @@ public class InjectionMetadata {
 
 	/**
 	 * Clear property skipping for the contained elements.
+	 *
 	 * @since 3.2.13
 	 */
 	public void clear(@Nullable PropertyValues pvs) {
@@ -167,8 +175,9 @@ public class InjectionMetadata {
 
 	/**
 	 * Return an {@code InjectionMetadata} instance, possibly for empty elements.
+	 *
 	 * @param elements the elements to inject (possibly empty)
-	 * @param clazz the target class
+	 * @param clazz    the target class
 	 * @return a new {@link #InjectionMetadata(Class, Collection)} instance
 	 * @since 5.2
 	 */
@@ -179,8 +188,9 @@ public class InjectionMetadata {
 
 	/**
 	 * Check whether the given injection metadata needs to be refreshed.
+	 *
 	 * @param metadata the existing metadata instance
-	 * @param clazz the current target class
+	 * @param clazz    the current target class
 	 * @return {@code true} indicating a refresh, {@code false} otherwise
 	 * @see #needsRefresh(Class)
 	 */
@@ -218,11 +228,9 @@ public class InjectionMetadata {
 		protected final Class<?> getResourceType() {
 			if (this.isField) {
 				return ((Field) this.member).getType();
-			}
-			else if (this.pd != null) {
+			} else if (this.pd != null) {
 				return this.pd.getPropertyType();
-			}
-			else {
+			} else {
 				return ((Method) this.member).getParameterTypes()[0];
 			}
 		}
@@ -234,8 +242,7 @@ public class InjectionMetadata {
 					throw new IllegalStateException("Specified field type [" + fieldType +
 							"] is incompatible with resource type [" + resourceType.getName() + "]");
 				}
-			}
-			else {
+			} else {
 				Class<?> paramType =
 						(this.pd != null ? this.pd.getPropertyType() : ((Method) this.member).getParameterTypes()[0]);
 				if (!(resourceType.isAssignableFrom(paramType) || paramType.isAssignableFrom(resourceType))) {
@@ -247,6 +254,7 @@ public class InjectionMetadata {
 
 		/**
 		 * Whether the property values should be injected.
+		 *
 		 * @param pvs property values to check
 		 * @return whether the property values should be injected
 		 * @since 6.0.10
@@ -271,14 +279,12 @@ public class InjectionMetadata {
 				Field field = (Field) this.member;
 				ReflectionUtils.makeAccessible(field);
 				field.set(target, getResourceToInject(target, requestingBeanName));
-			}
-			else {
+			} else {
 				try {
 					Method method = (Method) this.member;
 					ReflectionUtils.makeAccessible(method);
 					method.invoke(target, getResourceToInject(target, requestingBeanName));
-				}
-				catch (InvocationTargetException ex) {
+				} catch (InvocationTargetException ex) {
 					throw ex.getTargetException();
 				}
 			}
@@ -308,8 +314,7 @@ public class InjectionMetadata {
 						// Explicit value provided as part of the bean definition.
 						this.skip = true;
 						return true;
-					}
-					else if (pvs instanceof MutablePropertyValues mpvs) {
+					} else if (pvs instanceof MutablePropertyValues mpvs) {
 						mpvs.registerProcessedProperty(this.pd.getName());
 					}
 				}
@@ -320,6 +325,7 @@ public class InjectionMetadata {
 
 		/**
 		 * Clear property skipping for this element.
+		 *
 		 * @since 3.2.13
 		 */
 		protected void clearPropertySkipping(@Nullable PropertyValues pvs) {
